@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://localhost:8000', // Adjust as needed
+      '/api': 'https://backend-f7q7.onrender.com/', // Adjust as needed
     },
   },
 });
