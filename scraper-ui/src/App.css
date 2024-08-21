@@ -1,0 +1,43 @@
+/* src/App.css */
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.header {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 10px;
+  font-size: 1rem;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.error {
+  color: red;
+}
+
+nav {
+  margin-bottom: 20px;
+}
+
+nav a {
+  margin-right: 15px;
+  text-decoration: none;
+  color: #007bff;
+}
