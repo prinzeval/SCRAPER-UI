@@ -9,11 +9,18 @@ const Home: React.FC = () => {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedTool, setSelectedTool] = useState<string>("scrape"); // Default to 'scrape'
+  const [selectedTool, setSelectedTool] = useState<string>("scrape");
   const navigate = useNavigate();
 
   const handleScrape = async () => {
+    if (!url.trim()) {
+      setError("Please enter a URL to scrape");
+      return;
+    }
+    
     setLoading(true);
+    setError(null);
+    
     try {
       let response;
       switch (selectedTool) {
@@ -40,11 +47,12 @@ const Home: React.FC = () => {
         default:
           throw new Error("Invalid tool selected");
       }
-      setResult(response.data);
-      setError(null);
+      
+      // Navigate to result page with the data
+      navigate("/result", { state: { data: Array.isArray(response.data) ? response.data : [response.data] } });
     } catch (err) {
       console.error(err);
-      setError("An error occurred during scraping.");
+      setError("An error occurred during scraping. Please check the URL and try again.");
       setResult(null);
     } finally {
       setLoading(false);
@@ -52,205 +60,134 @@ const Home: React.FC = () => {
   };
 
   const handleFetch = async () => {
+    if (!url.trim()) {
+      setError("Please enter a URL to fetch");
+      return;
+    }
+    
     setLoading(true);
+    setError(null);
+    
     try {
       const response = await api.get("/fetch/", {
         params: { url },
       });
-      setError(null);
-      navigate("/result", { state: { data: response.data } });
+      navigate("/result", { state: { data: Array.isArray(response.data) ? response.data : [response.data] } });
     } catch (err) {
       console.error(err);
-      setError("An error occurred while fetching data.");
-      setResult(null);
+      setError("An error occurred while fetching data. Please check the URL and try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Web Scraper</h1>
-      <div style={styles.form}>
-        <input
-          type="text"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Enter URL"
-          style={styles.input as React.CSSProperties}
-        />
-        <input
-          type="text"
-          value={whitelist.join(", ")}
-          onChange={(e) =>
-            setWhitelist(e.target.value.split(",").map((item) => item.trim()))
-          }
-          placeholder="Enter whitelist (comma-separated)"
-          style={styles.input as React.CSSProperties}
-        />
-        <input
-          type="text"
-          value={blacklist.join(", ")}
-          onChange={(e) =>
-            setBlacklist(e.target.value.split(",").map((item) => item.trim()))
-          }
-          placeholder="Enter blacklist (comma-separated)"
-          style={styles.input as React.CSSProperties}
-        />
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleScrape();
+    }
+  };
 
-        {/* Tool Selection */}
-        <div style={styles.checkboxContainer as React.CSSProperties}>
-          <label style={styles.checkboxLabel as React.CSSProperties}>
+  return (
+    <div className="container">
+      <h1>NEURAL WEB SCRAPER</h1>
+      <div className="form-container">
+        <div className="input-group">
+          <label htmlFor="url">TARGET URL</label>
+          <input
+            id="url"
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Enter website URL to scan..."
+            onKeyDown={handleKeyDown}
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="whitelist">WHITELIST DOMAINS</label>
+          <input
+            id="whitelist"
+            type="text"
+            value={whitelist.join(", ")}
+            onChange={(e) =>
+              setWhitelist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
+            }
+            placeholder="Enter allowed domains (comma-separated)"
+          />
+        </div>
+
+        <div className="input-group">
+          <label htmlFor="blacklist">BLACKLIST DOMAINS</label>
+          <input
+            id="blacklist"
+            type="text"
+            value={blacklist.join(", ")}
+            onChange={(e) =>
+              setBlacklist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
+            }
+            placeholder="Enter blocked domains (comma-separated)"
+          />
+        </div>
+
+        <div className="radio-container">
+          <label className="radio-label">
             <input
               type="radio"
               value="scrape"
               checked={selectedTool === "scrape"}
               onChange={() => setSelectedTool("scrape")}
             />
-            Scrape
+            MULTI-PAGE SCAN
           </label>
-          <label style={styles.checkboxLabel as React.CSSProperties}>
+          <label className="radio-label">
             <input
               type="radio"
               value="scrape_single_page"
               checked={selectedTool === "scrape_single_page"}
               onChange={() => setSelectedTool("scrape_single_page")}
             />
-            Scrape Single Page
+            SINGLE PAGE SCAN
           </label>
-          <label style={styles.checkboxLabel as React.CSSProperties}>
+          <label className="radio-label">
             <input
               type="radio"
               value="single_page_media"
               checked={selectedTool === "single_page_media"}
               onChange={() => setSelectedTool("single_page_media")}
             />
-            Single Page Media
+            MEDIA EXTRACTION
           </label>
-          <label style={styles.checkboxLabel as React.CSSProperties}>
+          <label className="radio-label">
             <input
               type="radio"
               value="multiple_page_media"
               checked={selectedTool === "multiple_page_media"}
               onChange={() => setSelectedTool("multiple_page_media")}
             />
-            Multiple Page Media
+            MULTI-PAGE MEDIA
           </label>
         </div>
 
-        <div style={styles.buttonContainer as React.CSSProperties}>
-          <button
-            onClick={handleScrape}
-            style={styles.button as React.CSSProperties}
-            disabled={loading}
-          >
-            Scrape
+        <div className="button-container">
+          <button onClick={handleScrape} disabled={loading}>
+            INITIATE SCAN
           </button>
-          <button
-            onClick={handleFetch}
-            style={styles.button as React.CSSProperties}
-            disabled={loading}
-          >
-            Fetch
+          <button onClick={handleFetch} disabled={loading}>
+            FETCH DATA
           </button>
         </div>
       </div>
+
       {loading && (
-        <p style={styles.loading as React.CSSProperties}>Loading...</p>
-      )}
-      {error && <p style={styles.error as React.CSSProperties}>{error}</p>}
-      {result && !error && !window.location.search.includes("data") && (
-        <div style={styles.result as React.CSSProperties}>
-          <h2 style={styles.resultTitle as React.CSSProperties}>
-            Scraped Content:
-          </h2>
-          <pre style={styles.pre as React.CSSProperties}>
-            {JSON.stringify(result, null, 2)}
-          </pre>
+        <div className="loading">
+          <div className="spinner"></div>
+          <p className="loading-text">SCANNING TARGET...</p>
         </div>
       )}
+      
+      {error && <div className="error">{error}</div>}
     </div>
   );
-};
-
-// Styles object
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "auto",
-    backgroundColor: "#f4f4f4",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-  },
-  title: {
-    textAlign: "center",
-    color: "#333",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  input: {
-    padding: "10px",
-    fontSize: "16px",
-    borderRadius: "4px",
-    border: "1px solid #ddd",
-    outline: "none",
-    width: "100%",
-  },
-  buttonContainer: {
-    display: "flex",
-    gap: "10px",
-    justifyContent: "center",
-  },
-  button: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    borderRadius: "4px",
-    border: "none",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "background-color 0.3s",
-  },
-  error: {
-    color: "red",
-    textAlign: "center",
-    marginTop: "20px",
-  },
-  result: {
-    marginTop: "20px",
-    backgroundColor: "#fff",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-  },
-  resultTitle: {
-    marginBottom: "10px",
-    color: "#333",
-  },
-  pre: {
-    backgroundColor: "#f4f4f4",
-    padding: "10px",
-    borderRadius: "4px",
-    overflowX: "auto",
-  },
-  loading: {
-    textAlign: "center",
-    color: "#007bff",
-    marginTop: "20px",
-  },
-  checkboxContainer: {
-    display: "flex",
-    gap: "10px",
-    justifyContent: "center",
-    marginTop: "10px",
-  },
-  checkboxLabel: {
-    fontSize: "14px",
-  },
 };
 
 export default Home;
