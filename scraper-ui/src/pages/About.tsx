@@ -3,14 +3,14 @@ import React from "react";
 const About: React.FC = () => {
   return (
     <div className="container">
-      <h1>ABOUT THE NEURAL SCRAPER</h1>
+      <h1>ABOUT THE WEB SCRAPER</h1>
       
       <div className="about-section">
         <h2>SYSTEM OVERVIEW</h2>
         <p>
-          The Neural Web Scraper is an advanced data extraction tool designed to navigate and collect 
-          information from the digital landscape. Built with adaptive scanning algorithms, the system can 
-          traverse both single pages and complex multi-page structures to retrieve valuable data.
+          The Web Scraper is a data extraction tool designed to navigate and collect 
+          information from websites. Built with efficient scanning algorithms, the system can 
+          traverse both single pages and complex multi-page structures to retrieve data.
         </p>
       </div>
       
@@ -40,13 +40,13 @@ const About: React.FC = () => {
       </div>
       
       <div className="about-section">
-        <h2>USAGE PROTOCOLS</h2>
+        <h2>USAGE INSTRUCTIONS</h2>
         <ol className="protocol-list">
           <li>Enter the target URL in the designated input field</li>
           <li>Select appropriate scanning method based on extraction requirements</li>
           <li>Specify domain constraints if necessary (optional)</li>
-          <li>Initiate scan and await results</li>
-          <li>Review extracted data in the results interface</li>
+          <li>Click SCRAPE and wait for results</li>
+          <li>Review extracted data in the results section</li>
         </ol>
       </div>
       

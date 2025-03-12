@@ -1,16 +1,21 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../api";
+
+interface ContentItem {
+  title?: string;
+  content?: string;
+  media_links?: string;
+  url?: string;
+}
 
 const Home: React.FC = () => {
   const [url, setUrl] = useState("");
   const [whitelist, setWhitelist] = useState<string[]>([]);
   const [blacklist, setBlacklist] = useState<string[]>([]);
-  const [result, setResult] = useState<any>(null);
+  const [results, setResults] = useState<ContentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedTool, setSelectedTool] = useState<string>("scrape");
-  const navigate = useNavigate();
 
   const handleScrape = async () => {
     if (!url.trim()) {
@@ -48,12 +53,12 @@ const Home: React.FC = () => {
           throw new Error("Invalid tool selected");
       }
       
-      // Navigate to result page with the data
-      navigate("/result", { state: { data: Array.isArray(response.data) ? response.data : [response.data] } });
+      // Set results directly in this component
+      setResults(Array.isArray(response.data) ? response.data : [response.data]);
     } catch (err) {
       console.error(err);
       setError("An error occurred during scraping. Please check the URL and try again.");
-      setResult(null);
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -72,7 +77,7 @@ const Home: React.FC = () => {
       const response = await api.get("/fetch/", {
         params: { url },
       });
-      navigate("/result", { state: { data: Array.isArray(response.data) ? response.data : [response.data] } });
+      setResults(Array.isArray(response.data) ? response.data : [response.data]);
     } catch (err) {
       console.error(err);
       setError("An error occurred while fetching data. Please check the URL and try again.");
@@ -87,96 +92,177 @@ const Home: React.FC = () => {
     }
   };
 
+  // Format media links into array
+  const formatMediaLinks = (links: string = "") => {
+    if (!links) return [];
+    return links.split(",").map(link => link.trim()).filter(Boolean);
+  };
+
+  const handleNewScrape = () => {
+    setResults([]);
+    setError(null);
+  };
+
   return (
     <div className="container">
-      <h1>NEURAL WEB SCRAPER</h1>
-      <div className="form-container">
-        <div className="input-group">
-          <label htmlFor="url">TARGET URL</label>
-          <input
-            id="url"
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter website URL to scan..."
-            onKeyDown={handleKeyDown}
-          />
-        </div>
+      {results.length === 0 ? (
+        <>
+          <h1>WEB SCRAPER</h1>
+          <div className="form-container">
+            <div className="input-group">
+              <label htmlFor="url">TARGET URL</label>
+              <input
+                id="url"
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Enter website URL to scan..."
+                onKeyDown={handleKeyDown}
+              />
+            </div>
 
-        <div className="input-group">
-          <label htmlFor="whitelist">WHITELIST DOMAINS</label>
-          <input
-            id="whitelist"
-            type="text"
-            value={whitelist.join(", ")}
-            onChange={(e) =>
-              setWhitelist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
-            }
-            placeholder="Enter allowed domains (comma-separated)"
-          />
-        </div>
+            <div className="input-group">
+              <label htmlFor="whitelist">WHITELIST DOMAINS</label>
+              <input
+                id="whitelist"
+                type="text"
+                value={whitelist.join(", ")}
+                onChange={(e) =>
+                  setWhitelist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
+                }
+                placeholder="Enter allowed domains (comma-separated)"
+              />
+            </div>
 
-        <div className="input-group">
-          <label htmlFor="blacklist">BLACKLIST DOMAINS</label>
-          <input
-            id="blacklist"
-            type="text"
-            value={blacklist.join(", ")}
-            onChange={(e) =>
-              setBlacklist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
-            }
-            placeholder="Enter blocked domains (comma-separated)"
-          />
-        </div>
+            <div className="input-group">
+              <label htmlFor="blacklist">BLACKLIST DOMAINS</label>
+              <input
+                id="blacklist"
+                type="text"
+                value={blacklist.join(", ")}
+                onChange={(e) =>
+                  setBlacklist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
+                }
+                placeholder="Enter blocked domains (comma-separated)"
+              />
+            </div>
 
-        <div className="radio-container">
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="scrape"
-              checked={selectedTool === "scrape"}
-              onChange={() => setSelectedTool("scrape")}
-            />
-            MULTI-PAGE SCAN
-          </label>
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="scrape_single_page"
-              checked={selectedTool === "scrape_single_page"}
-              onChange={() => setSelectedTool("scrape_single_page")}
-            />
-            SINGLE PAGE SCAN
-          </label>
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="single_page_media"
-              checked={selectedTool === "single_page_media"}
-              onChange={() => setSelectedTool("single_page_media")}
-            />
-            MEDIA EXTRACTION
-          </label>
-          <label className="radio-label">
-            <input
-              type="radio"
-              value="multiple_page_media"
-              checked={selectedTool === "multiple_page_media"}
-              onChange={() => setSelectedTool("multiple_page_media")}
-            />
-            MULTI-PAGE MEDIA
-          </label>
-        </div>
+            <div className="radio-container">
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  value="scrape"
+                  checked={selectedTool === "scrape"}
+                  onChange={() => setSelectedTool("scrape")}
+                />
+                MULTI-PAGE SCAN
+              </label>
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  value="scrape_single_page"
+                  checked={selectedTool === "scrape_single_page"}
+                  onChange={() => setSelectedTool("scrape_single_page")}
+                />
+                SINGLE PAGE SCAN
+              </label>
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  value="single_page_media"
+                  checked={selectedTool === "single_page_media"}
+                  onChange={() => setSelectedTool("single_page_media")}
+                />
+                MEDIA EXTRACTION
+              </label>
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  value="multiple_page_media"
+                  checked={selectedTool === "multiple_page_media"}
+                  onChange={() => setSelectedTool("multiple_page_media")}
+                />
+                MULTI-PAGE MEDIA
+              </label>
+            </div>
 
-        <div className="button-container">
-          <button onClick={handleScrape} disabled={loading}>
-            INITIATE SCAN
-          </button>
-          <button onClick={handleFetch} disabled={loading}>
-            FETCH DATA
-          </button>
-        </div>
-      </div>
+            <div className="button-container">
+              <button onClick={handleScrape} disabled={loading}>
+                SCRAPE
+              </button>
+              <button onClick={handleFetch} disabled={loading}>
+                FETCH DATA
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <h1>SCRAPE RESULTS</h1>
+          <div className="scan-summary">
+            <p>Retrieved {results.length} item{results.length !== 1 ? 's' : ''}</p>
+            <button onClick={handleNewScrape} className="return-button">
+              NEW SCRAPE
+            </button>
+          </div>
+
+          <div className="results-container">
+            {results.map((item: ContentItem, index: number) => {
+              const { title, content, media_links, url } = item;
+              const mediaLinksArray = formatMediaLinks(media_links);
+              
+              return (
+                <div key={index} className="result-item">
+                  <h2 className="result-title">
+                    {title || `Result ${index + 1}`}
+                  </h2>
+                  
+                  {url && (
+                    <div className="result-source">
+                      <span className="label">SOURCE:</span>
+                      <a 
+                        href={url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="external-link"
+                      >
+                        {url}
+                      </a>
+                    </div>
+                  )}
+                  
+                  {content && (
+                    <div className="result-section">
+                      <h3>CONTENT</h3>
+                      <pre className="result-content">{content}</pre>
+                    </div>
+                  )}
+                  
+                  {mediaLinksArray.length > 0 && (
+                    <div className="result-section">
+                      <h3>MEDIA ASSETS</h3>
+                      <ul className="link-list">
+                        {mediaLinksArray.map((link, linkIndex) => (
+                          <li key={linkIndex} className="link-item">
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="external-link"
+                            >
+                              {link.split('/').pop() || link}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {loading && (
         <div className="loading">
