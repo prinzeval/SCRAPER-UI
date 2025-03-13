@@ -1,12 +1,98 @@
-// src/api.ts
-import axios from "axios";
+import axios from 'axios';
 
-// Set the base URL for the API requests
-const api = axios.create({
-  baseURL: "http://localhost:8000/", // Replace with your FastAPI backend URL
-  headers: {
-    "Content-Type": "application/json", // Ensure content type is set
-  },
-});
+const API_BASE_URL = 'http://localhost:8000'; // Replace with your backend URL
 
-export default api;
+// Fetch data for a single URL
+export const fetchData = async (url: string) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/fetch`, { params: { url } });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+// Fetch data for multiple URLs
+export const fetchMultipleData = async (urls: string[]) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/fetch_multiple`, { urls });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching multiple data:', error);
+    throw error;
+  }
+};
+
+// Scrape a single page
+export const scrapeSinglePage = async (url: string) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/scrape_single_page`, { url });
+    return response.data;
+  } catch (error) {
+    console.error('Error scraping single page:', error);
+    throw error;
+  }
+};
+
+// Extract media from a single page
+export const extractMediaFromSinglePage = async (url: string) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/single_page_media`, { url });
+    return response.data;
+  } catch (error) {
+    console.error('Error extracting media:', error);
+    throw error;
+  }
+};
+
+// Scrape multiple pages for media
+export const scrapeMultiplePagesMedia = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/multiple_page_media`, {
+      url,
+      whitelist,
+      blacklist,
+      link_limit: linkLimit,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error scraping multiple pages:', error);
+    throw error;
+  }
+};
+
+export const scrapeWebsite = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/scrape`, {
+      url,
+      whitelist,
+      blacklist,
+      link_limit: linkLimit,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error scraping website:', error);
+    throw error;
+  }
+};
+
+export const extractLinksOnly = async (url: string) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/extract_links`, { url });
+    return response.data;
+  } catch (error) {
+    console.error('Error extracting links:', error);
+    throw error;
+  }
+};
+
+export const extractRelatedLinks = async (url: string) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/extract_related_links`, { url });
+    return response.data;
+  } catch (error) {
+    console.error('Error extracting related links:', error);
+    throw error;
+  }
+};
