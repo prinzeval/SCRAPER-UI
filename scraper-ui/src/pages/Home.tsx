@@ -28,23 +28,25 @@ const Home: React.FC = () => {
     
     try {
       let response;
+      const urls = url.split(",").map(u => u.trim()).filter(Boolean);
+      
       switch (selectedTool) {
         case "scrape":
           response = await api.post("/scrape/", {
-            url,
+            url: urls[0], // Only the first URL for now
             whitelist,
             blacklist,
           });
           break;
         case "scrape_single_page":
-          response = await api.post("/scrape_single_page/", { url });
+          response = await api.post("/scrape_single_page/", { url: urls[0] });
           break;
         case "single_page_media":
-          response = await api.post("/single_page_media/", { url });
+          response = await api.post("/single_page_media/", { url: urls[0] });
           break;
         case "multiple_page_media":
           response = await api.post("/multiple_page_media/", {
-            url,
+            url: urls[0], // Only the first URL for now
             whitelist,
             blacklist,
           });
@@ -69,25 +71,38 @@ const Home: React.FC = () => {
       setError("Please enter a URL to fetch");
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await api.get("/fetch/", {
-        params: { url },
+      // Split the input URL by commas to handle multiple URLs
+      const urls = url
+        .split(",")
+        .map((u) => u.trim())
+        .filter(Boolean);
+
+      const response = await api.post("/fetch_multiple/", {
+        urls: urls,
       });
-      setResults(Array.isArray(response.data) ? response.data : [response.data]);
+
+      setResults(
+        Array.isArray(response.data.data)
+          ? response.data.data
+          : [response.data.data]
+      );
     } catch (err) {
       console.error(err);
-      setError("An error occurred while fetching data. Please check the URL and try again.");
+      setError(
+        "An error occurred while fetching data. Please check the URL and try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleScrape();
     }
   };
@@ -95,7 +110,10 @@ const Home: React.FC = () => {
   // Format media links into array
   const formatMediaLinks = (links: string = "") => {
     if (!links) return [];
-    return links.split(",").map(link => link.trim()).filter(Boolean);
+    return links
+      .split(",")
+      .map((link) => link.trim())
+      .filter(Boolean);
   };
 
   const handleNewScrape = () => {
@@ -110,17 +128,16 @@ const Home: React.FC = () => {
           <h1>WEB SCRAPER</h1>
           <div className="form-container">
             <div className="input-group">
-              <label htmlFor="url">TARGET URL</label>
+              <label htmlFor="url">TARGET URL(s)</label>
               <input
                 id="url"
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter website URL to scan..."
+                placeholder="Enter website URL(s) to scan (comma-separated)..."
                 onKeyDown={handleKeyDown}
               />
             </div>
-
             <div className="input-group">
               <label htmlFor="whitelist">WHITELIST DOMAINS</label>
               <input
@@ -128,7 +145,12 @@ const Home: React.FC = () => {
                 type="text"
                 value={whitelist.join(", ")}
                 onChange={(e) =>
-                  setWhitelist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
+                  setWhitelist(
+                    e.target.value
+                      .split(",")
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                  )
                 }
                 placeholder="Enter allowed domains (comma-separated)"
               />
@@ -141,7 +163,12 @@ const Home: React.FC = () => {
                 type="text"
                 value={blacklist.join(", ")}
                 onChange={(e) =>
-                  setBlacklist(e.target.value.split(",").map((item) => item.trim()).filter(Boolean))
+                  setBlacklist(
+                    e.target.value
+                      .split(",")
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                  )
                 }
                 placeholder="Enter blocked domains (comma-separated)"
               />
@@ -200,7 +227,9 @@ const Home: React.FC = () => {
         <>
           <h1>SCRAPE RESULTS</h1>
           <div className="scan-summary">
-            <p>Retrieved {results.length} item{results.length !== 1 ? 's' : ''}</p>
+            <p>
+              Retrieved {results.length} item{results.length !== 1 ? "s" : ""}
+            </p>
             <button onClick={handleNewScrape} className="return-button">
               NEW SCRAPE
             </button>
@@ -210,19 +239,19 @@ const Home: React.FC = () => {
             {results.map((item: ContentItem, index: number) => {
               const { title, content, media_links, url } = item;
               const mediaLinksArray = formatMediaLinks(media_links);
-              
+
               return (
                 <div key={index} className="result-item">
                   <h2 className="result-title">
                     {title || `Result ${index + 1}`}
                   </h2>
-                  
+
                   {url && (
                     <div className="result-source">
                       <span className="label">SOURCE:</span>
-                      <a 
-                        href={url} 
-                        target="_blank" 
+                      <a
+                        href={url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="external-link"
                       >
@@ -230,14 +259,14 @@ const Home: React.FC = () => {
                       </a>
                     </div>
                   )}
-                  
+
                   {content && (
                     <div className="result-section">
                       <h3>CONTENT</h3>
                       <pre className="result-content">{content}</pre>
                     </div>
                   )}
-                  
+
                   {mediaLinksArray.length > 0 && (
                     <div className="result-section">
                       <h3>MEDIA ASSETS</h3>
@@ -250,7 +279,7 @@ const Home: React.FC = () => {
                               rel="noopener noreferrer"
                               className="external-link"
                             >
-                              {link.split('/').pop() || link}
+                              {link.split("/").pop() || link}
                             </a>
                           </li>
                         ))}
@@ -270,7 +299,7 @@ const Home: React.FC = () => {
           <p className="loading-text">SCANNING TARGET...</p>
         </div>
       )}
-      
+
       {error && <div className="error">{error}</div>}
     </div>
   );

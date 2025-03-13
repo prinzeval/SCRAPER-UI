@@ -18,7 +18,7 @@ const Result: React.FC = () => {
     return (
       <div className="container">
         <h1>NO DATA AVAILABLE</h1>
-        <p>No content was retrieved from the target URL.</p>
+        <p>No content was retrieved from the target URL(s).</p>
         <button onClick={() => navigate("/")}>RETURN TO SCANNER</button>
       </div>
     );
