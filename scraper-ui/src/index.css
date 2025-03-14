@@ -297,6 +297,14 @@ button:disabled {
   color: var(--primary-color);
   margin: 0;
 }
+.mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600{
+  margin-top: 4px;
+  padding: 4px;
+  background-color: #3b82f6;
+  color: #fff;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
 
 .clear-history-button {
   background: linear-gradient(135deg, #ff4d4d, #cc0000);
