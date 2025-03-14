@@ -1,12 +1,19 @@
 import axios from 'axios';
 
-const API_BASE_URL = "https://backend-f7q7.onrender.com/"
-; // Replace with your backend URL
+const API_BASE_URL = "https://backend-f7q7.onrender.com/"; // Replace with your backend URL
+
+// Create an axios instance with the required content header
+const api = axios.create({
+  baseURL: API_BASE_URL, // Use the API base URL
+  headers: {
+    "Content-Type": "application/json", // Ensure the content type is set
+  },
+});
 
 // Fetch data for a single URL
 export const fetchData = async (url: string) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/fetch`, { params: { url } });
+    const response = await api.get("/fetch", { params: { url } });
     return response.data;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -17,7 +24,7 @@ export const fetchData = async (url: string) => {
 // Fetch data for multiple URLs
 export const fetchMultipleData = async (urls: string[]) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/fetch_multiple`, { urls });
+    const response = await api.post("/fetch_multiple", { urls });
     return response.data;
   } catch (error) {
     console.error('Error fetching multiple data:', error);
@@ -28,7 +35,7 @@ export const fetchMultipleData = async (urls: string[]) => {
 // Scrape a single page
 export const scrapeSinglePage = async (url: string) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/scrape_single_page`, { url });
+    const response = await api.post("/scrape_single_page", { url });
     return response.data;
   } catch (error) {
     console.error('Error scraping single page:', error);
@@ -39,7 +46,7 @@ export const scrapeSinglePage = async (url: string) => {
 // Extract media from a single page
 export const extractMediaFromSinglePage = async (url: string) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/single_page_media`, { url });
+    const response = await api.post("/single_page_media", { url });
     return response.data;
   } catch (error) {
     console.error('Error extracting media:', error);
@@ -50,7 +57,7 @@ export const extractMediaFromSinglePage = async (url: string) => {
 // Scrape multiple pages for media
 export const scrapeMultiplePagesMedia = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/multiple_page_media`, {
+    const response = await api.post("/multiple_page_media", {
       url,
       whitelist,
       blacklist,
@@ -65,7 +72,7 @@ export const scrapeMultiplePagesMedia = async (url: string, whitelist: string[],
 
 export const scrapeWebsite = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/scrape`, {
+    const response = await api.post("/scrape", {
       url,
       whitelist,
       blacklist,
@@ -80,7 +87,7 @@ export const scrapeWebsite = async (url: string, whitelist: string[], blacklist:
 
 export const extractAllLinksInPage = async (url: string) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/extract_links`, { url });
+    const response = await api.post("/extract_links", { url });
     return response.data;
   } catch (error) {
     console.error('Error extracting links:', error);
@@ -90,7 +97,7 @@ export const extractAllLinksInPage = async (url: string) => {
 
 export const extractAllRelatedLinksInPage = async (url: string) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/extract_related_links`, { url });
+    const response = await api.post("/extract_related_links", { url });
     return response.data;
   } catch (error) {
     console.error('Error extracting related links:', error);
@@ -101,7 +108,7 @@ export const extractAllRelatedLinksInPage = async (url: string) => {
 // New functions for multiple links and related links
 export const extractAllLinksInMultiplePages = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/extract_multiple_links`, {
+    const response = await api.post("/extract_multiple_links", {
       url,
       whitelist,
       blacklist,
@@ -116,7 +123,7 @@ export const extractAllLinksInMultiplePages = async (url: string, whitelist: str
 
 export const extractAllRelatedLinksInMultiplePages = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/extract_multiple_related_links`, {
+    const response = await api.post("/extract_multiple_related_links", {
       url,
       whitelist,
       blacklist,
