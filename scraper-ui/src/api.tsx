@@ -77,7 +77,7 @@ export const scrapeWebsite = async (url: string, whitelist: string[], blacklist:
   }
 };
 
-export const extractLinksOnly = async (url: string) => {
+export const extractAllLinksInPage = async (url: string) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/extract_links`, { url });
     return response.data;
@@ -87,12 +87,43 @@ export const extractLinksOnly = async (url: string) => {
   }
 };
 
-export const extractRelatedLinks = async (url: string) => {
+export const extractAllRelatedLinksInPage = async (url: string) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/extract_related_links`, { url });
     return response.data;
   } catch (error) {
     console.error('Error extracting related links:', error);
+    throw error;
+  }
+};
+
+// New functions for multiple links and related links
+export const extractAllLinksInMultiplePages = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/extract_multiple_links`, {
+      url,
+      whitelist,
+      blacklist,
+      link_limit: linkLimit,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error extracting multiple links:', error);
+    throw error;
+  }
+};
+
+export const extractAllRelatedLinksInMultiplePages = async (url: string, whitelist: string[], blacklist: string[], linkLimit: number) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/extract_multiple_related_links`, {
+      url,
+      whitelist,
+      blacklist,
+      link_limit: linkLimit,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error extracting multiple related links:', error);
     throw error;
   }
 };
