@@ -225,6 +225,34 @@ button:disabled {
   border-radius: 20px;
 }
 
+/* Additional CSS for JSON content */
+.json-view {
+  background-color: var(--panel-bg);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Roboto Mono', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word; /* Ensure long words break to avoid overflow */
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--panel-bg);
+}
+
+.json-view::-webkit-scrollbar {
+  width: 6px;
+}
+
+.json-view::-webkit-scrollbar-track {
+  background: var(--panel-bg);
+}
+
+.json-view::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 20px;
+}
+
 /* Loading Indicator */
 .loading {
   display: flex;

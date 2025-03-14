@@ -43,12 +43,12 @@ const HistoryPage: React.FC = () => {
   return (
     <div className="history-container">
       <div className="history-header">
-      <button
+      {/* <button
         onClick={() => navigate(-1)}
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
       >
         Home
-      </button>
+      </button> */}
         <h2>Scraping History</h2>
         <button className="clear-history-button" onClick={clearHistory}>
           Clear All History
