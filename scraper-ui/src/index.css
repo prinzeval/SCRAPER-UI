@@ -260,6 +260,7 @@ button:disabled {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--primary-color) var(--panel-bg);
+  word-wrap: break-word; /* Ensure text wraps to the next line */
 }
 
 .result-content::-webkit-scrollbar {
