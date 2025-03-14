@@ -172,57 +172,6 @@ button:disabled {
   opacity: 0.7;
 }
 
-/* Radio Button Styles */
-.radio-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin: 20px 0;
-}
-
-.radio-label {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  background-color: var(--panel-bg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all var(--transition-speed) ease;
-}
-
-.radio-label:hover {
-  border-color: var(--primary-color);
-}
-
-.radio-label input[type="radio"] {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--text-dim);
-  border-radius: 50%;
-  margin-right: 10px;
-  position: relative;
-  transition: all var(--transition-speed) ease;
-}
-
-.radio-label input[type="radio"]:checked {
-  border-color: var(--primary-color);
-}
-
-.radio-label input[type="radio"]:checked::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background-color: var(--primary-color);
-  border-radius: 50%;
-}
-
 /* Results */
 .result-item {
   background-color: var(--panel-bg);
@@ -256,11 +205,11 @@ button:disabled {
   font-family: 'Roboto Mono', monospace;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: break-word; /* Ensure long words break to avoid overflow */
   max-height: 300px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--primary-color) var(--panel-bg);
-  word-wrap: break-word; /* Ensure text wraps to the next line */
 }
 
 .result-content::-webkit-scrollbar {
