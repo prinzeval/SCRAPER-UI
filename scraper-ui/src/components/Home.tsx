@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // For navigation to the History page
 import {
   fetchData,
   fetchMultipleData,
@@ -9,7 +10,7 @@ import {
   extractAllLinksInPage,
   extractAllRelatedLinksInPage,
   extractAllLinksInMultiplePages,
-  extractAllRelatedLinksInMultiplePages
+  extractAllRelatedLinksInMultiplePages,
 } from '../api';
 import Result from './Result';
 
@@ -42,12 +43,12 @@ const Home: React.FC = () => {
 
     if (action === 'fetch_multiple') {
       const urlList = urls.split(',').map(url => url.trim()).filter(Boolean);
-      
+
       if (urlList.length === 0) {
         setValidationError('Please enter at least one URL');
         return false;
       }
-      
+
       const invalidUrls = urlList.filter(url => !isValidUrl(url));
       if (invalidUrls.length > 0) {
         setValidationError(`Invalid URL format: ${invalidUrls.join(', ')}`);
@@ -75,9 +76,29 @@ const Home: React.FC = () => {
     return true;
   };
 
+  // Save result to history
+  const saveToHistory = (url: string, action: string, data: any) => {
+    const historyItem = {
+      url,
+      action,
+      timestamp: new Date().toLocaleString(),
+      data,
+    };
+
+    // Get existing history from local storage
+    const savedHistory = localStorage.getItem('scrapingHistory');
+    const history = savedHistory ? JSON.parse(savedHistory) : [];
+
+    // Add new item to history
+    history.unshift(historyItem);
+
+    // Save updated history back to local storage
+    localStorage.setItem('scrapingHistory', JSON.stringify(history));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate input before proceeding
     if (!validateInput()) {
       return;
@@ -91,7 +112,7 @@ const Home: React.FC = () => {
       // Parse whitelist and blacklist for actions that need them
       const whitelistArray = whitelist.split(',').map((item) => item.trim()).filter(Boolean);
       const blacklistArray = blacklist.split(',').map((item) => item.trim()).filter(Boolean);
-      
+
       switch (action) {
         case 'fetch':
           response = await fetchData(url);
@@ -127,11 +148,15 @@ const Home: React.FC = () => {
         default:
           throw new Error('Invalid action');
       }
+
+      // Save the result to history
+      saveToHistory(url, action, response);
+
       setResult(response);
     } catch (error: any) {
       console.error('Error:', error);
-      setResult({ 
-        error: error.response?.data?.detail || error.message || 'An error occurred. Please try again.' 
+      setResult({
+        error: error.response?.data?.detail || error.message || 'An error occurred. Please try again.',
       });
     } finally {
       setLoading(false);
@@ -149,8 +174,8 @@ const Home: React.FC = () => {
       setAction('fetch');
     } catch (error: any) {
       console.error('Error fetching single URL:', error);
-      setResult({ 
-        error: error.response?.data?.detail || error.message || `Failed to fetch data for ${urlToFetch}` 
+      setResult({
+        error: error.response?.data?.detail || error.message || `Failed to fetch data for ${urlToFetch}`,
       });
     } finally {
       setFetchingAdditional(false);
@@ -168,8 +193,8 @@ const Home: React.FC = () => {
       setAction('fetch_multiple');
     } catch (error: any) {
       console.error('Error fetching multiple URLs:', error);
-      setResult({ 
-        error: error.response?.data?.detail || error.message || 'Failed to fetch data for multiple URLs' 
+      setResult({
+        error: error.response?.data?.detail || error.message || 'Failed to fetch data for multiple URLs',
       });
     } finally {
       setFetchingAdditional(false);
@@ -178,10 +203,10 @@ const Home: React.FC = () => {
 
   // Check if the current action needs additional parameters
   const needsAdditionalParams = [
-    'scrape_with_params', 
-    'scrape_multiple_media', 
-    'extract_multiple_links', 
-    'extract_multiple_related_links'
+    'scrape_with_params',
+    'scrape_multiple_media',
+    'extract_multiple_links',
+    'extract_multiple_related_links',
   ].includes(action);
 
   // Check if the current action requires multiple URLs
@@ -191,7 +216,7 @@ const Home: React.FC = () => {
   const handleActionChange = (newAction: string) => {
     setAction(newAction);
     setValidationError('');
-    
+
     // Reset URL fields when switching modes
     if (newAction === 'fetch_multiple' && action !== 'fetch_multiple') {
       setUrl('');
@@ -201,18 +226,17 @@ const Home: React.FC = () => {
   };
 
   // Determine if a fetch single button should be shown with results
-  const shouldShowFetchSingleButton = result && 
-    !result.error && 
-    result.url &&
-    action !== 'fetch';
+  const shouldShowFetchSingleButton = result &&
+    !result.error &&
+    (result.url || (action === 'scrape' && url)); // Show for single-page scraping results
 
   // Determine if a fetch multiple button should be shown with results
-  const shouldShowFetchMultipleButton = result && 
-    !result.error && 
-    ((result.all_links && result.all_links.length > 0) || 
-     (result.links && result.links.length > 0) ||
-     (result.related_links && result.related_links.length > 0));
-  
+  const shouldShowFetchMultipleButton = result &&
+    !result.error &&
+    ((result.all_links && result.all_links.length > 0) ||
+      (result.links && result.links.length > 0) ||
+      (result.related_links && result.related_links.length > 0));
+
   // Get the appropriate links array for fetching multiple
   const getLinksArrayForFetch = () => {
     if (result.all_links && result.all_links.length > 0) {
@@ -234,9 +258,9 @@ const Home: React.FC = () => {
         {/* Action selection */}
         <div>
           <label className="block mb-2 font-medium">Action</label>
-          <select 
+          <select
             className="w-full p-2 border rounded"
-            value={action} 
+            value={action}
             onChange={(e) => handleActionChange(e.target.value)}
           >
             <option value="fetch">Fetch Data</option>
@@ -348,8 +372,8 @@ const Home: React.FC = () => {
         )}
 
         {/* Submit button */}
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
           disabled={loading || fetchingAdditional}
         >
@@ -361,19 +385,19 @@ const Home: React.FC = () => {
       {(shouldShowFetchSingleButton || shouldShowFetchMultipleButton) && (
         <div className="mt-4 p-3 bg-gray-50 border rounded flex flex-wrap gap-2">
           <h3 className="w-full font-medium mb-1">Quick Actions:</h3>
-          
+
           {shouldShowFetchSingleButton && (
-            <button 
-              onClick={() => handleFetchSingleURL(result.url)}
+            <button
+              onClick={() => handleFetchSingleURL(result.url || url)} // Use result.url or the current URL
               disabled={fetchingAdditional}
               className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-green-300 text-sm"
             >
               {fetchingAdditional ? 'Fetching...' : 'Fetch This URL'}
             </button>
           )}
-          
+
           {shouldShowFetchMultipleButton && (
-            <button 
+            <button
               onClick={() => handleFetchMultipleURLs(getLinksArrayForFetch())}
               disabled={fetchingAdditional}
               className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-purple-300 text-sm"
@@ -386,6 +410,14 @@ const Home: React.FC = () => {
 
       {/* Display results */}
       {result && <Result data={result} />}
+
+      {/* Link to History page */}
+      <Link
+        to="/history"
+        className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+      >
+        View History
+      </Link>
     </div>
   );
 };
