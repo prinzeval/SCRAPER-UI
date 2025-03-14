@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'; // Replace with your backend URL
+const API_BASE_URL = "https://backend-f7q7.onrender.com/"
+; // Replace with your backend URL
 
 // Fetch data for a single URL
 export const fetchData = async (url: string) => {
